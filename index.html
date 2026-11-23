@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тренировки для колена</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: program (Пн | Ср) on top, exercise library below as filterable cards. Cool slate + teal, amber for cautions. */
+:root{
+  --bg:#f3f6f6; --surface:#ffffff; --ink:#14262c; --muted:#546a71; --line:#d3dfe1;
+  --accent:#0e7c86; --accent-ink:#ffffff; --accent-soft:#dcf0f1;
+  --warn-bg:#fdf0d2; --warn-ink:#6a4700; --warn-line:#ecd08a;
+  --rehab-bg:#e0efe6; --rehab-ink:#1d5a3a;
+  --font-display:"Manrope","Segoe UI",system-ui,sans-serif;
+  --font-body:"Onest","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1b1f; --surface:#16262b; --ink:#e6f0f1; --muted:#9db3b9; --line:#2b4249;
+    --accent:#4cc3cc; --accent-ink:#06262a; --accent-soft:#12373c;
+    --warn-bg:#3a2f10; --warn-ink:#f3d58a; --warn-line:#6b5520;
+    --rehab-bg:#173a29; --rehab-ink:#9fdcb8;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1b1f; --surface:#16262b; --ink:#e6f0f1; --muted:#9db3b9; --line:#2b4249;
+  --accent:#4cc3cc; --accent-ink:#06262a; --accent-soft:#12373c;
+  --warn-bg:#3a2f10; --warn-ink:#f3d58a; --warn-line:#6b5520;
+  --rehab-bg:#173a29; --rehab-ink:#9fdcb8;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 56px}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(26px,4.4vw,38px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:22px;font-weight:800}
+h3{font-size:17px;font-weight:700}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.lead{color:var(--muted);margin-top:8px;max-width:65ch}
+header{display:grid;gap:16px;margin-bottom:20px}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:0;padding:0;list-style:none}
+.rules li{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:10px;padding:10px 14px;font-size:15px}
+.rules b{font-family:var(--font-display);display:block;font-size:20px;line-height:1.2}
+details.box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0}
+details.box>summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:12px;align-items:center}
+details.box>summary::-webkit-details-marker{display:none}
+details.box>summary::after{content:"＋";color:var(--accent);font-weight:700}
+details.box[open]>summary::after{content:"−"}
+details.box .inner{padding:0 16px 16px;display:grid;gap:10px;max-width:75ch}
+.inner ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.mri{font-size:14px;background:var(--accent-soft);border-radius:8px;padding:10px 12px}
+.note{font-size:14px;color:var(--muted)}
+.warnbox{background:var(--warn-bg);color:var(--warn-ink);border:1px solid var(--warn-line);border-radius:10px;padding:10px 14px;font-size:15px}
+section{margin-top:32px}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.days{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:16px}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:12px;align-content:start}
+.day-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.daypick{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.daypick select{font:inherit;font-family:var(--font-display);font-weight:800;font-size:20px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+.rows{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.row{display:grid;grid-template-columns:1fr;gap:8px;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.row-top{display:flex;justify-content:space-between;gap:8px;align-items:start}
+.row-name{font-weight:600}
+.row-sub{font-size:13px;color:var(--muted)}
+.fields{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.fields label{font-size:12px;color:var(--muted);display:grid;gap:2px}
+.fields input{font:inherit;font-size:15px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:84px}
+.fields input.sets{width:60px}
+.fields input.wt{width:110px}
+.x{align-self:end;padding-bottom:7px;color:var(--muted)}
+button{font:inherit;cursor:pointer}
+.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:4px 10px;font-size:13px}
+.ghost:hover{border-color:var(--accent);color:var(--accent)}
+.primary{background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:9px 16px;font-weight:600}
+.secondary{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 16px;font-weight:500}
+.secondary:hover{border-color:var(--accent)}
+.empty{color:var(--muted);font-size:14px;padding:6px 2px}
+.checks{display:grid;gap:6px;border-top:1px dashed var(--line);padding-top:10px}
+.checks p{font-size:13px;color:var(--muted)}
+.checks label{display:flex;gap:8px;align-items:center;font-size:14px}
+.checks input{width:18px;height:18px;accent-color:var(--accent)}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);margin-top:10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 14px;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:14px;margin-top:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px;align-content:start}
+.card.caution{border-color:var(--warn-line)}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:12px;border-radius:999px;padding:2px 9px;background:var(--accent-soft);color:var(--ink)}
+.tag.rehab{background:var(--rehab-bg);color:var(--rehab-ink);font-weight:600}
+.tag.warn{background:var(--warn-bg);color:var(--warn-ink);font-weight:600}
+.card p.what{font-size:14px;color:var(--muted)}
+.card details summary{cursor:pointer;color:var(--accent);font-size:14px;font-weight:600}
+.card details ol,.card details ul{margin:8px 0 0;padding-left:20px;display:grid;gap:4px;font-size:14px}
+.card .warnline{font-size:13px;background:var(--warn-bg);color:var(--warn-ink);border-radius:8px;padding:8px 10px}
+.srcs{font-size:12px;color:var(--muted)}
+.add{display:flex;gap:8px}
+.add button{flex:1;border-radius:10px;padding:8px 10px;font-size:14px;font-weight:600;border:1px solid var(--accent);background:transparent;color:var(--accent)}
+.add button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.avoid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px;margin:12px 0 0;padding:0;list-style:none}
+.avoid li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
+.sources{columns:2 300px;font-size:14px;padding-left:18px;margin:10px 0 0}
+.sources li{break-inside:avoid;margin-bottom:6px}
+@media (prefers-reduced-motion:no-preference){
+  .card,.row{transition:border-color .15s}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>Тренировки для колена</h1>
+    <p class="lead">Две тренировки в неделю: дни недели выберете сами (по умолчанию понедельник и среда). Упражнения реабилитолога уже внутри. Другие упражнения из библиотеки ниже можно добавить в любую тренировку, а подходы, повторения и вес менять прямо в карточке.</p>
+  </div>
+
+  <ul class="rules" aria-label="Главные правила">
+    <li><b>Боль ≤ 3 из 10</b>Не растёт ни во время, ни после упражнения</li>
+    <li><b>Без отёка</b>Колено не припухает ни в тот же день, ни на следующее утро</li>
+    <li><b>3 × 10</b>Медленно, полная комфортная амплитуда, 2–3 повторения в запасе</li>
+  </ul>
+
+  <details class="box">
+    <summary>Что в МРТ от 09.09.2026 и как это влияет на выбор упражнений</summary>
+    <div class="inner">
+      <p class="mri">Частичный разрыв зоны перехода тела в задний рог медиального мениска (Stoller IIIa), изменения тела и заднего рога (Stoller II), экструзия тела; слабовыраженный отёк костного мозга медиального мыщелка большеберцовой кости; связки целы; рекомендован травматолог-ортопед.</p>
+      <ul>
+        <li><b>Экструзия</b> означает, что тело мениска смещено наружу из суставной щели. Тогда площадь контакта костей меньше, а давление на хрящ выше, поэтому нагрузку на колено дозируют аккуратно. <span class="note">(обзор по экструзии мениска, PMC)</span></li>
+        <li><b>Отёк костного мозга</b> может быть реакцией на перегрузку при повреждении мениска. Способа ускорить его рассасывание не доказано, а он может давать боль дольше. Поэтому критерий один: боль и припухлость после нагрузки. <span class="note">(NHS Tayside)</span></li>
+        <li><b>Силовые упражнения</b> при дегенеративных разрывах мениска дают результат, сопоставимый с операцией, поэтому тренировки остаются основой. <span class="note">(исследование в BMJ, TIME)</span></li>
+        <li>В списке «осторожно»: вращения на опорной ноге, глубокие приседания и скручивания.</li>
+      </ul>
+      <p class="warnbox">Протоколы Gundersen, HSS и Mass General Brigham написаны для восстановления после операции. Я брала из них перечень упражнений, но не сроки. МРТ рекомендует консультацию травматолога-ортопеда: если она ещё не была, покажите ему эту программу, особенно болгарские приседания и зашагивания на высокую платформу.</p>
+    </div>
+  </details>
+</header>
+
+<section aria-labelledby="prog-h">
+  <div class="sec-head">
+    <h2 id="prog-h">Моя программа</h2>
+    <div class="tools">
+      <button class="secondary" type="button" data-act="reset">Вернуть программу реабилитолога</button>
+      <button class="primary" type="button" data-act="copy">Скопировать как текст</button>
+    </div>
+  </div>
+  <div class="days" id="days"></div>
+  <details class="box" id="exportBox" style="margin-top:14px">
+    <summary>Текст программы</summary>
+    <div class="inner"><p class="note" id="copyMsg">Если кнопка копирования не сработала, выделите текст ниже и скопируйте вручную.</p><textarea id="exportText" readonly></textarea></div>
+  </details>
+  <details class="box" id="backupBox" style="margin-top:14px">
+    <summary>Резервная копия</summary>
+    <div class="inner">
+      <p>Программа, веса и отметки хранятся только в этом браузере на этом устройстве. Если очистить данные сайта или открыть страницу на другом устройстве, они пропадут. Сохраните копию после изменений и восстановите её, когда понадобится.</p>
+      <div class="tools">
+        <button class="primary" type="button" data-act="bk-download">Скачать файл копии</button>
+        <button class="secondary" type="button" data-act="bk-copy">Скопировать копию как текст</button>
+        <button class="secondary" type="button" data-act="undo">Вернуть предыдущую версию</button>
+      </div>
+      <label class="note" for="bkFile">Восстановить из файла копии</label>
+      <input type="file" id="bkFile" accept=".json,application/json" data-file="1">
+      <label class="note" for="bkText">Или вставьте текст копии сюда</label>
+      <textarea id="bkText" placeholder="Вставьте сюда текст копии"></textarea>
+      <div class="tools"><button class="secondary" type="button" data-act="bk-restore">Восстановить из текста</button></div>
+      <p class="note" id="bkMsg" role="status">Перед каждым восстановлением и сбросом текущая версия сохраняется, её можно вернуть кнопкой выше.</p>
+    </div>
+  </details>
+</section>
+
+<section aria-labelledby="lib-h">
+  <div class="sec-head">
+    <h2 id="lib-h">Библиотека упражнений</h2>
+    <p class="note">Кнопки с днями недели добавляют или убирают упражнение в нужной тренировке.</p>
+  </div>
+  <div class="chips" id="chips" role="group" aria-label="Фильтр упражнений"></div>
+  <div class="grid" id="lib"></div>
+</section>
+
+<section aria-labelledby="avoid-h">
+  <h2 id="avoid-h">Пока лучше не делать</h2>
+  <p class="note" style="margin-top:6px">Пока ортопед и реабилитолог не разрешили. Вторая и третья позиции — моя осторожность из-за экструзии.</p>
+  <ul class="avoid">
+    <li><b>Вращения и скручивания на опорной ноге.</b> Врачи советуют избегать pivoting и twisting. <a href="https://www.healthline.com/health/sports-injuries/8-exercises-for-a-meniscus-tear">Healthline</a></li>
+    <li><b>Глубокие приседания и выпады.</b> Глубокое сгибание под нагрузкой в списке тех, что не советуют. <a href="https://www.healthline.com/health/sports-injuries/8-exercises-for-a-meniscus-tear">Healthline</a></li>
+    <li><b>Бег и прыжки.</b> Ударная нагрузка на колено с экструзией, обсудите возвращение к ним с ортопедом.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="src-h">
+  <h2 id="src-h">Источники</h2>
+  <ul class="sources" id="sources"></ul>
+</section>
+
+</div>
+
+<script>
+(function(){
+  var SRC = {
+    video:   {t:"Видео реабилитолога"},
+    medbridge:{t:"MedBridge", u:"https://www.medbridge.com/blog/effective-meniscus-injury-exercises-for-rehabilitation-and-recovery"},
+    mgb:     {t:"Mass General Brigham", u:"https://www.massgeneralbrigham.org/content/dam/unified-xwalk/pdf/patient-education/english/rehabilitation-protocol-for-meniscus-repair.pdf"},
+    gundersen:{t:"Gundersen Health", u:"https://www.gundersenhealth.org/document/11511"},
+    stluke:  {t:"Saint Luke's", u:"https://saintlukeskc.org/node/61958"},
+    kaiser:  {t:"Kaiser Permanente", u:"https://healthy.kaiserpermanente.org/health-wellness/health-encyclopedia/he.uh2071"},
+    umm:     {t:"UMM Health", u:"https://www.ummhealth.org/health-library/exercise-program-for-meniscus-tear"},
+    alberta: {t:"MyHealth Alberta", u:"https://myhealth.alberta.ca/Health/aftercareinformation/pages/conditions.aspx?hwid=ad1485"}
+  };
+  var OTHER_SOURCES = [
+    {t:"Healthline: 8 exercises for a meniscus tear", u:"https://www.healthline.com/health/sports-injuries/8-exercises-for-a-meniscus-tear"},
+    {t:"NHS Tayside: Bone marrow oedema", u:"https://www.nhstayside.scot.nhs.uk/WorkingWithUs/ReferralHelpSystem/PROD_354627"},
+    {t:"TIME о исследовании BMJ: упражнения и операция при дегенеративном разрыве", u:"https://time.com/4422336/knee-injury-exercise-surgery/"},
+    {t:"Meniscus root tears and extrusion (PMC)", u:"https://pmc.ncbi.nlm.nih.gov/articles/PMC11698001"},
+    {t:"HSS: Meniscus Repair Rehabilitation Guidelines", u:"https://www.hss.edu/files/HSSRehabilitationClinicalGuidelines-Knee-MeniscusRepair-Post-operative.pdf"}
+  ];
+
+  var CATS = ["Квадрицепс","Задняя поверхность","Ягодицы и бёдра","Голень","Функциональные","Баланс","Разминка и растяжка"];
+
+  var EX = [
+    {id:"bike", name:"Велотренажёр или эллипс", cat:"Разминка и растяжка", level:"extra",
+     what:"Разогрев сустава без ударной нагрузки.",
+     how:["Лёгкое сопротивление, комфортный темп.","Седло так, чтобы колено в нижней точке было слегка согнуто."],
+     sets:1, reps:"6 мин", src:["mgb"]},
+    {id:"leg_ext", name:"Разгибание ноги в тренажёре, по одной ноге", cat:"Квадрицепс", level:"rehab",
+     what:"Передняя поверхность бедра. Упражнение из видео реабилитолога.",
+     how:["Сядьте, валик на нижней трети голени.","Медленно разогните ногу, задержитесь на секунду, так же медленно вернитесь.","Сначала одна нога, затем другая; вес комфортный."],
+     warn:"Если появляется боль спереди колена или щелчки, снизьте вес и амплитуду и уточните диапазон у реабилитолога.",
+     sets:3, reps:"10", src:["video","medbridge"]},
+    {id:"leg_curl", name:"Сгибание ноги в тренажёре, по одной ноге", cat:"Задняя поверхность", level:"rehab",
+     what:"Задняя поверхность бедра. Из видео: сидя в тренажёре или лёжа на животе.",
+     how:["Сядьте (или лягте на живот), валик над пяткой.","Медленно согните ногу и так же медленно вернитесь.","Одна нога за раз."],
+     sets:3, reps:"10", src:["video","mgb"]},
+    {id:"stepup", name:"Зашагивание на платформу с весом", cat:"Функциональные", level:"rehab",
+     what:"Квадрицепс и ягодицы в рабочем движении. Из видео реабилитолога.",
+     how:["Гантель или гиря в руке; одна нога на платформе.","Поднимитесь на платформу, свободную ногу вынесите вперёд с подъёмом бедра, не касаясь опоры.","Полностью контролируйте опорную ногу, колено не заваливается внутрь.","Каждая нога отдельно."],
+     warn:"Начните с низкой платформы и без веса. Чем выше платформа, тем глубже сгибание колена под нагрузкой.",
+     prog:"Сначала низкая платформа без веса, затем добавляйте вес, потом высоту.",
+     sets:3, reps:"10 на ногу", src:["video","gundersen"]},
+    {id:"bridge", name:"Ягодичный мост", cat:"Ягодицы и бёдра", level:"rehab",
+     what:"Ягодицы и задняя поверхность бедра, почти без нагрузки на колено. Из видео.",
+     how:["Лопатки на скамье, стопы на полу.","Поднимите таз до прямой линии плечи-таз-колено.","Медленно опустите."],
+     prog:"Без веса, затем вес на тазу, затем на одной ноге.",
+     sets:3, reps:"10", src:["video","mgb"]},
+    {id:"band_walk", name:"Боковые шаги с мини-лентой", cat:"Ягодицы и бёдра", level:"rehab",
+     what:"Средняя ягодичная мышца, помогает не заваливать колено внутрь. Из видео.",
+     how:["Лента чуть выше лодыжек, ноги чуть шире плеч.","Полуприсед, стопы параллельны.","Не выпрямляясь, шагайте в сторону до приятного напряжения в ягодицах."],
+     sets:3, reps:"10 шагов в сторону", src:["video","gundersen"]},
+    {id:"calf", name:"Подъёмы на носки стоя", cat:"Голень", level:"rehab",
+     what:"Икроножные мышцы. В видео упоминаются упражнения на голень, точное исполнение уточните у реабилитолога.",
+     how:["Стойте на ровной поверхности или на краю платформы, держась за опору.","Медленно поднимитесь на носки и так же опуститесь."],
+     sets:3, reps:"10", src:["video","gundersen"]},
+    {id:"rdl", name:"Румынская тяга", cat:"Задняя поверхность", level:"rehab",
+     what:"Задняя поверхность бедра и ягодицы. Из видео реабилитолога.",
+     how:["Колени слегка согнуты, спина ровная.","Отводите таз назад, вес скользит вдоль ног.","Опускайтесь до растяжения в задней поверхности бедра, не до боли."],
+     prog:"Две ноги, затем на одной ноге.",
+     sets:3, reps:"10", src:["video"]},
+    {id:"deadlift", name:"Становая тяга", cat:"Задняя поверхность", level:"rehab",
+     what:"В видео названа допустимой. Это следующий шаг после румынской тяги.",
+     how:["Комфортный вес, нейтральная спина.","Не доводите до боли."],
+     warn:"Вводите после того, как румынская тяга идёт легко.",
+     sets:3, reps:"10", src:["video"]},
+    {id:"bulgarian", name:"Болгарские приседания", cat:"Функциональные", level:"rehab",
+     what:"Одна нога впереди, другая на скамье. В видео названы допустимыми.",
+     how:["Опускайтесь медленно примерно до прямого угла между бедром и голенью.","Если легко, добавляйте вес."],
+     warn:"Глубокое сгибание под нагрузкой при экструзии мениска: начинайте с собственного веса, не глубже прямого угла, и вводите после того, как зашагивания идут без боли.",
+     sets:3, reps:"10 на ногу", src:["video"]},
+    {id:"quad_set", name:"Напряжение квадрицепса (квадрицепс-сет)", cat:"Квадрицепс", level:"extra",
+     what:"Изометрия без движения в колене. Подходит для разминки и в дни, когда колено раздражено.",
+     how:["Сядьте или лягте, нога прямая, под коленом небольшой валик.","Напрягите мышцу бедра, прижимая колено к валику, и держите 5–6 секунд.","Расслабьтесь."],
+     sets:2, reps:"10 × 6 с", src:["kaiser","stluke","umm"]},
+    {id:"slr", name:"Подъём прямой ноги лёжа", cat:"Квадрицепс", level:"extra",
+     what:"Квадрицепс и сгибатели бедра, колено остаётся прямым.",
+     how:["Лёжа на спине, вторая нога согнута.","Напрягите мышцу бедра и поднимите прямую ногу до уровня согнутого колена.","Медленно опустите."],
+     sets:3, reps:"10", src:["stluke","gundersen"]},
+    {id:"wall_slide", name:"Мини-приседание у стены или на мяче", cat:"Квадрицепс", level:"extra",
+     what:"Небольшой диапазон сгибания, нагрузка на квадрицепс.",
+     how:["Спина у стены (или мяч между спиной и стеной).","Приседайте только в малом диапазоне, в протоколе указано до 60° сгибания.","Колени смотрят по линии стоп."],
+     warn:"Амплитуду согласуйте с реабилитологом и не заходите в боль.",
+     sets:3, reps:"10", src:["mgb"]},
+    {id:"clamshell", name:"Ракушка (лёжа на боку)", cat:"Ягодицы и бёдра", level:"extra",
+     what:"Наружные ротаторы и средняя ягодичная мышца. Укрепление этих мышц советуют, чтобы колено не заваливалось внутрь.",
+     how:["Лёжа на боку, колени согнуты, стопы вместе.","Раскрывайте верхнее колено, не отрывая стопы друг от друга и не раскачивая таз.","Можно добавить мини-ленту."],
+     sets:3, reps:"10 на сторону", src:["umm","gundersen"]},
+    {id:"side_raise", name:"Отведение ноги лёжа на боку", cat:"Ягодицы и бёдра", level:"extra",
+     what:"Отводящие мышцы бедра, вариант «4-way SLR» из протокола.",
+     how:["Лёжа на боку, нижняя нога согнута.","Поднимайте прямую верхнюю ногу чуть назад от линии тела, без вращения таза.","Медленно опустите."],
+     sets:3, reps:"10 на сторону", src:["gundersen"]},
+    {id:"seated_calf", name:"Подъёмы на носки сидя", cat:"Голень", level:"extra",
+     what:"Камбаловидная мышца, нагрузка на колено минимальная.",
+     how:["Сидя, стопы на полу, груз (гантель) на коленях.","Поднимайте пятки и медленно опускайте."],
+     sets:3, reps:"12", src:["gundersen"]},
+    {id:"balance", name:"Стойка на одной ноге", cat:"Баланс", level:"extra",
+     what:"Контроль колена и чувство положения сустава.",
+     how:["Встаньте на одну ногу, колено слегка мягкое, рядом опора.","Держите 30 секунд.","Усложнение: закрыть глаза или встать на мягкую платформу."],
+     sets:3, reps:"30 с на ногу", src:["gundersen","mgb"]},
+    {id:"calf_stretch", name:"Растяжка икроножной мышцы", cat:"Разминка и растяжка", level:"extra",
+     what:"После тренировки, в конце.",
+     how:["Руки на стене, одна нога сзади, пятка на полу, колено сзади прямое.","Подайтесь вперёд до растяжения в икре, держите 20–30 секунд."],
+     sets:2, reps:"30 с на ногу", src:["alberta","gundersen"]},
+    {id:"ham_stretch", name:"Растяжка задней поверхности бедра", cat:"Разминка и растяжка", level:"extra",
+     what:"После тренировки, в конце.",
+     how:["Лёжа на спине, петля (полотенце) на стопе, нога поднята.","Тяните ногу к себе, пока не почувствуете растяжение, без боли в колене."],
+     sets:2, reps:"30 с на ногу", src:["gundersen"]}
+  ];
+
+  var DEFAULT = {
+    mon:[["bike",1,"6 мин"],["leg_ext",3,"10"],["stepup",3,"10 на ногу"],["bridge",3,"10"],["band_walk",3,"10 шагов в сторону"],["calf",3,"10"]],
+    wed:[["bike",1,"6 мин"],["leg_curl",3,"10"],["rdl",3,"10"],["bridge",3,"10"],["band_walk",3,"10 шагов в сторону"]]
+  };
+  var WD = ["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"];
+  var WDS = ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
+  var SLOTNAME = {mon:"Тренировка 1", wed:"Тренировка 2"};
+  var DEFAULT_WD = {mon:0, wed:2};
+  var CHECKS = ["Боль не выше 3 из 10","Боль не усилилась после тренировки","На следующее утро колено не отекло"];
+  var KEY = "knee-program-v1";
+
+  function byId(id){ for(var i=0;i<EX.length;i++){ if(EX[i].id===id) return EX[i]; } return null; }
+  function fresh(){
+    var s = {days:{mon:[],wed:[]}, checks:{mon:[false,false,false], wed:[false,false,false]}, wd:{mon:DEFAULT_WD.mon, wed:DEFAULT_WD.wed}};
+    ["mon","wed"].forEach(function(d){
+      DEFAULT[d].forEach(function(r){ s.days[d].push({id:r[0], sets:r[1], reps:r[2], weight:""}); });
+    });
+    return s;
+  }
+  var state = fresh();
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(raw){ var p = JSON.parse(raw); if(p && p.days && p.checks) state = p; }
+  }catch(e){}
+  if(!state.wd || typeof state.wd.mon !== "number" || typeof state.wd.wed !== "number" || state.wd.mon === state.wd.wed){
+    state.wd = {mon:DEFAULT_WD.mon, wed:DEFAULT_WD.wed};
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+  function savePrev(){ try{ localStorage.setItem(KEY+"-prev", JSON.stringify(state)); }catch(e){} }
+  function bkMsg(t){ document.getElementById("bkMsg").textContent = t; }
+  function backupText(){
+    return JSON.stringify({app:"knee-program", v:1, saved:new Date().toISOString(), state:state}, null, 2);
+  }
+  function sanitize(p){
+    if(!p || !p.state || !p.state.days) return null;
+    var s = fresh();
+    ["mon","wed"].forEach(function(d){
+      var rows = Array.isArray(p.state.days[d]) ? p.state.days[d] : [];
+      s.days[d] = rows.filter(function(r){ return r && byId(r.id); }).map(function(r){
+        return {id:r.id, sets:parseInt(r.sets,10)||1, reps:String(r.reps==null?"":r.reps), weight:String(r.weight==null?"":r.weight)};
+      });
+      if(p.state.checks && Array.isArray(p.state.checks[d])){
+        s.checks[d] = [0,1,2].map(function(i){ return !!p.state.checks[d][i]; });
+      }
+    });
+    var w = p.state.wd;
+    if(w && typeof w.mon==="number" && typeof w.wed==="number" && w.mon!==w.wed && w.mon>=0 && w.mon<7 && w.wed>=0 && w.wed<7){ s.wd = {mon:w.mon, wed:w.wed}; }
+    return s;
+  }
+  function restoreFrom(text){
+    var p; try{ p = JSON.parse(text); }catch(e){ bkMsg("Не получилось прочитать копию: текст повреждён или неполный. Скопируйте его целиком."); return; }
+    var s = sanitize(p);
+    if(!s || p.app!=="knee-program"){ bkMsg("Это не копия этой программы."); return; }
+    savePrev(); state = s; save(); render();
+    bkMsg("Копия восстановлена. Прежняя версия сохранена, её можно вернуть.");
+  }
+
+  function inDay(d,id){ return state.days[d].some(function(r){return r.id===id;}); }
+  function toggle(d,id){
+    if(inDay(d,id)){ state.days[d] = state.days[d].filter(function(r){return r.id!==id;}); }
+    else{ var e = byId(id); state.days[d].push({id:id, sets:e.sets, reps:e.reps, weight:""}); }
+    save(); render();
+  }
+
+  var filter = "all";
+
+  function renderDays(){
+    var html = "";
+    ["mon","wed"].forEach(function(d){
+      var rows = state.days[d].map(function(r,i){
+        var e = byId(r.id); if(!e) return "";
+        return '<li class="row"><div class="row-top"><div><div class="row-name">'+(i+1)+'. '+e.name+'</div><div class="row-sub">'+e.cat+'</div></div>'
+          +'<button class="ghost" type="button" data-act="remove" data-day="'+d+'" data-id="'+e.id+'" aria-label="Убрать упражнение: '+e.name+'">Убрать</button></div>'
+          +'<div class="fields">'
+          +'<label>Подходы<input class="sets" type="number" min="1" max="10" inputmode="numeric" id="s-'+d+'-'+e.id+'" data-f="sets" data-day="'+d+'" data-id="'+e.id+'" value="'+r.sets+'"></label>'
+          +'<span class="x" aria-hidden="true">×</span>'
+          +'<label>Повторения<input type="text" id="r-'+d+'-'+e.id+'" data-f="reps" data-day="'+d+'" data-id="'+e.id+'" value="'+r.reps+'"></label>'
+          +'<label>Вес<input class="wt" type="text" placeholder="кг" id="w-'+d+'-'+e.id+'" data-f="weight" data-day="'+d+'" data-id="'+e.id+'" value="'+r.weight+'"></label>'
+          +'</div></li>';
+      }).join("");
+      if(!rows) rows = '<li class="empty">Пока пусто. Добавьте упражнения из библиотеки ниже.</li>';
+      var checks = CHECKS.map(function(c,i){
+        return '<label><input type="checkbox" id="c-'+d+'-'+i+'" data-chk="'+d+'" data-i="'+i+'"'+(state.checks[d][i]?' checked':'')+'>'+c+'</label>';
+      }).join("");
+      var other = (d==="mon") ? "wed" : "mon";
+      var opts = WD.map(function(n,i){
+        return '<option value="'+i+'"'+(state.wd[d]===i?' selected':'')+(state.wd[other]===i?' disabled':'')+'>'+n+'</option>';
+      }).join("");
+      html += '<article class="day"><div class="day-head"><label class="daypick">'+SLOTNAME[d]+'<select id="wd-'+d+'" data-wd="'+d+'">'+opts+'</select></label></div>'
+        +'<ol class="rows">'+rows+'</ol>'
+        +'<div class="checks"><p>После тренировки отметьте:</p>'+checks+'</div></article>';
+    });
+    document.getElementById("days").innerHTML = html;
+  }
+
+  function renderChips(){
+    var items = [["all","Все"],["rehab","От реабилитолога"]].concat(CATS.map(function(c){return [c,c];}));
+    document.getElementById("chips").innerHTML = items.map(function(it){
+      return '<button type="button" class="chip" data-filter="'+it[0]+'" aria-pressed="'+(filter===it[0])+'">'+it[1]+'</button>';
+    }).join("");
+  }
+
+  function srcLinks(keys){
+    return keys.map(function(k){
+      var s = SRC[k];
+      return s.u ? '<a href="'+s.u+'">'+s.t+'</a>' : s.t;
+    }).join(", ");
+  }
+
+  function renderLib(){
+    var list = EX.filter(function(e){
+      if(filter==="all") return true;
+      if(filter==="rehab") return e.level==="rehab";
+      return e.cat===filter;
+    });
+    document.getElementById("lib").innerHTML = list.map(function(e){
+      var tags = '<span class="tag">'+e.cat+'</span>'
+        + (e.level==="rehab" ? '<span class="tag rehab">Реабилитолог</span>' : '<span class="tag">Дополнительно</span>')
+        + (e.warn ? '<span class="tag warn">Осторожно</span>' : '');
+      var how = '<ol>'+e.how.map(function(h){return '<li>'+h+'</li>';}).join("")+'</ol>' + (e.prog ? '<p class="note" style="margin-top:8px">'+e.prog+'</p>' : '');
+      return '<article class="card'+(e.warn?' caution':'')+'"><div class="tags">'+tags+'</div><h3>'+e.name+'</h3><p class="what">'+e.what+'</p>'
+        + (e.warn ? '<p class="warnline">'+e.warn+'</p>' : '')
+        + '<details><summary>Как делать</summary>'+how+'</details>'
+        + '<p class="srcs">Источник: '+srcLinks(e.src)+'</p>'
+        + '<div class="add">'
+        + '<button type="button" data-act="toggle" data-day="mon" data-id="'+e.id+'" aria-pressed="'+inDay("mon",e.id)+'">'+(inDay("mon",e.id)?'✓ ':'+ ')+WDS[state.wd.mon]+'</button>'
+        + '<button type="button" data-act="toggle" data-day="wed" data-id="'+e.id+'" aria-pressed="'+inDay("wed",e.id)+'">'+(inDay("wed",e.id)?'✓ ':'+ ')+WDS[state.wd.wed]+'</button>'
+        + '</div></article>';
+    }).join("");
+  }
+
+  function renderSources(){
+    var all = [];
+    Object.keys(SRC).forEach(function(k){ if(SRC[k].u) all.push(SRC[k]); });
+    all = all.concat(OTHER_SOURCES);
+    document.getElementById("sources").innerHTML = all.map(function(s){ return '<li><a href="'+s.u+'">'+s.t+'</a></li>'; }).join("");
+  }
+
+  function exportText(){
+    var out = ["Программа тренировок для колена",
+      "Правила: боль не выше 3 из 10 и не растёт; колено не отекает; медленно, 2–3 повторения в запасе.",""];    ["mon","wed"].forEach(function(d){
+      out.push(WD[state.wd[d]].toUpperCase());
+      state.days[d].forEach(function(r,i){
+        var e = byId(r.id); if(!e) return;
+        out.push((i+1)+". "+e.name+": "+r.sets+" × "+r.reps+(r.weight? ", вес "+r.weight : ""));
+      });
+      out.push("");
+    });
+    return out.join("\n");
+  }
+
+  function render(){
+    renderDays(); renderChips(); renderLib();
+    document.getElementById("exportText").value = exportText();
+  }
+
+  document.addEventListener("input", function(ev){
+    var t = ev.target, f = t.getAttribute && t.getAttribute("data-f");
+    if(!f) return;
+    var d = t.getAttribute("data-day"), id = t.getAttribute("data-id");
+    state.days[d].forEach(function(r){ if(r.id===id){ r[f] = (f==="sets") ? (parseInt(t.value,10)||1) : t.value; } });
+    save();
+    document.getElementById("exportText").value = exportText();
+  });
+
+  document.addEventListener("change", function(ev){
+    var t = ev.target, w = t.getAttribute && t.getAttribute("data-wd");
+    if(t.getAttribute && t.getAttribute("data-file") && t.files && t.files[0]){
+      var fr = new FileReader();
+      fr.onload = function(){ restoreFrom(String(fr.result)); };
+      fr.onerror = function(){ bkMsg("Не удалось прочитать файл."); };
+      fr.readAsText(t.files[0]);
+      t.value = "";
+      return;
+    }
+    if(w){
+      var v = parseInt(t.value,10), o = (w==="mon") ? "wed" : "mon";
+      if(v !== state.wd[o]){ state.wd[w] = v; }
+      save(); render();
+      return;
+    }
+    var d = t.getAttribute && t.getAttribute("data-chk");
+    if(!d) return;
+    state.checks[d][parseInt(t.getAttribute("data-i"),10)] = t.checked;
+    save();
+  });
+
+  document.addEventListener("click", function(ev){
+    var b = ev.target.closest ? ev.target.closest("button") : null;
+    if(!b) return;
+    var act = b.getAttribute("data-act");
+    if(b.hasAttribute("data-filter")){ filter = b.getAttribute("data-filter"); renderChips(); renderLib(); return; }
+    if(act==="toggle"){ toggle(b.getAttribute("data-day"), b.getAttribute("data-id")); }
+    else if(act==="remove"){ toggle(b.getAttribute("data-day"), b.getAttribute("data-id")); }
+    else if(act==="reset"){ savePrev(); state = fresh(); save(); render(); bkMsg("Программа сброшена. Прежнюю версию можно вернуть в разделе «Резервная копия»."); }
+    else if(act==="undo"){
+      var raw2 = null; try{ raw2 = localStorage.getItem(KEY+"-prev"); }catch(e){}
+      if(!raw2){ bkMsg("Предыдущей версии пока нет."); document.getElementById("backupBox").open = true; return; }
+      var cur = JSON.stringify(state);
+      var s2 = null; try{ s2 = sanitize({state:JSON.parse(raw2)}); }catch(e){}
+      if(!s2){ bkMsg("Предыдущую версию прочитать не удалось."); return; }
+      try{ localStorage.setItem(KEY+"-prev", cur); }catch(e){}
+      state = s2; save(); render(); bkMsg("Возвращена предыдущая версия.");
+    }
+    else if(act==="bk-download"){
+      try{
+        var blob = new Blob([backupText()], {type:"application/json"});
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "knee-program-backup-"+new Date().toISOString().slice(0,10)+".json";
+        document.body.appendChild(a); a.click(); a.remove();
+        bkMsg("Файл копии запрошен. Если скачивание не началось, скопируйте копию как текст и сохраните в заметках.");
+      }catch(e){ bkMsg("Скачивание здесь недоступно. Скопируйте копию как текст и сохраните в заметках."); }
+    }
+    else if(act==="bk-copy"){
+      var bt = document.getElementById("bkText"); bt.value = backupText();
+      var ok = function(g){ bkMsg(g ? "Копия скопирована. Вставьте её в заметки или сообщение себе." : "Не удалось скопировать автоматически. Текст в поле ниже выделен, нажмите Ctrl+C (на телефоне: Копировать)."); if(!g){ bt.focus(); bt.select(); } };
+      try{ navigator.clipboard.writeText(bt.value).then(function(){ok(true);}, function(){ok(false);}); }catch(e){ ok(false); }
+    }
+    else if(act==="bk-restore"){ restoreFrom(document.getElementById("bkText").value); }
+    else if(act==="copy"){
+      var box = document.getElementById("exportBox"), ta = document.getElementById("exportText"), msg = document.getElementById("copyMsg");
+      ta.value = exportText(); box.open = true;
+      var done = function(ok){
+        msg.textContent = ok ? "Скопировано." : "Не удалось скопировать автоматически. Текст выделен, нажмите Ctrl+C (на телефоне: Копировать).";
+        if(!ok){ ta.focus(); ta.select(); }
+      };
+      try{
+        navigator.clipboard.writeText(ta.value).then(function(){done(true);}, function(){done(false);});
+      }catch(e){ done(false); }
+    }
+  });
+
+  renderSources();
+  render();
+})();
+</script>
+</body>
+</html>
