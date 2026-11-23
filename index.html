@@ -183,9 +183,10 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
 <section aria-labelledby="lib-h">
   <div class="sec-head">
     <h2 id="lib-h">Библиотека упражнений</h2>
-    <p class="note">Кнопки с днями недели добавляют или убирают упражнение в нужной тренировке.</p>
+    <p class="note">Кнопки с днями недели добавляют или убирают упражнение в нужной тренировке. В «Как делать» есть ссылки на видео техники.</p>
   </div>
   <div class="chips" id="chips" role="group" aria-label="Фильтр упражнений"></div>
+  <p class="warnbox" style="margin-top:14px">Видео подобраны поиском по названиям упражнений и написаны разными авторами, не врачами. Они показывают технику, но не учитывают ваше колено: глубину, высоту платформы и вес ориентируйте по рекомендациям реабилитолога и правилу боли не выше 3 из 10.</p>
   <div class="grid" id="lib"></div>
 </section>
 
@@ -225,6 +226,28 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
     {t:"Meniscus root tears and extrusion (PMC)", u:"https://pmc.ncbi.nlm.nih.gov/articles/PMC11698001"},
     {t:"HSS: Meniscus Repair Rehabilitation Guidelines", u:"https://www.hss.edu/files/HSSRehabilitationClinicalGuidelines-Knee-MeniscusRepair-Post-operative.pdf"}
   ];
+
+  var YT = "https://www.youtube.com/watch?v=";
+  var VID = {
+    leg_ext:   [["hXyC9CGfvo4","Техника и ошибки"],["xDFRj3E1rIo","Идеальная техника"]],
+    leg_curl:  [["BXXaYSW2Ozw","Лёжа в тренажёре"],["MOE6nBmmpdU","Сидя в тренажёре"]],
+    stepup:    [["0JtwInDOHfU","Как выполнять"],["zpLCeGhBul0","С гантелями, нюансы"],["QPW1QxMUmB4","Разбор ошибок"]],
+    bridge:    [["vVVgirycHbY","Техника и варианты, в том числе на одной ноге"],["dtWBAJbuuKg","На одной ноге"]],
+    band_walk: [["Y_IfnMot2M4","Mini band side step","EN"],["mKCe63bpPxA","Mini band lateral walk","EN"]],
+    calf:      [["2qswCcH7iQc","Стоя, два варианта"],["l6kaamNEeXc","На одной ноге на возвышении"]],
+    rdl:       [["w8618QnyZi8","С гантелями"],["fd7PjHjHICY","На одной ноге"]],
+    deadlift:  [["ugkSLm4_XmU","С гантелями, нюансы"]],
+    bulgarian: [["alM4hjqfOoE","Правильная техника"],["VDyPdfpOnw0","Техника и нюансы"]],
+    quad_set:  [["HscSsKwohoQ","Quadriceps isometric set","EN"],["VhoTCYP4QuI","Isométrico de cuádriceps","ES"]],
+    slr:       [["U4L_6JEv9Jg","Straight leg raises","EN"]],
+    wall_slide:[["IukWbevPdgs","Приседание с мячом за спиной"],["q8JL27QMdbM","Приседания у стены на фитболе"]],
+    clamshell: [["V1pKVnHorIM","Clamshell, hip abductor","EN"],["Wc95leKBLYg","How to do the clam","EN"]],
+    side_raise:[["A79S8UBEukc","С фитнес-резинкой"],["7uMYFB08O4I","Махи ногой лёжа на боку"]],
+    seated_calf:[["xxDJ7SaYVm8","Подъём на носки сидя"],["tRzOQ9nQnbs","Seated calf raise"]],
+    balance:   [["9ZgHBDzPr7c","Single leg balance and proprioception","EN"],["6aOtkfIPS8Y","Single leg balance","EN"]],
+    calf_stretch:[["mL99mSTxoJ4","Растяжка икроножных"],["1CrGD7zO478","Растяжка камбаловидной у стены"]],
+    ham_stretch:[["CmIbrEiMXik","Лёжа на спине"],["-3ZFLVf1a4c","Лёжа, пилатес"]]
+  };
 
   var CATS = ["Квадрицепс","Задняя поверхность","Ягодицы и бёдра","Голень","Функциональные","Баланс","Разминка и растяжка"];
 
@@ -434,7 +457,11 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
       var tags = '<span class="tag">'+e.cat+'</span>'
         + (e.level==="rehab" ? '<span class="tag rehab">Реабилитолог</span>' : '<span class="tag">Дополнительно</span>')
         + (e.warn ? '<span class="tag warn">Осторожно</span>' : '');
-      var how = '<ol>'+e.how.map(function(h){return '<li>'+h+'</li>';}).join("")+'</ol>' + (e.prog ? '<p class="note" style="margin-top:8px">'+e.prog+'</p>' : '');
+      var vids = (VID[e.id] || []).map(function(v){
+        return '<li><a href="'+YT+v[0]+'" target="_blank" rel="noopener">'+v[1]+'</a>'+(v[2] ? ' <span class="note">('+v[2]+')</span>' : '')+'</li>';
+      }).join("");
+      var how = '<ol>'+e.how.map(function(h){return '<li>'+h+'</li>';}).join("")+'</ol>' + (e.prog ? '<p class="note" style="margin-top:8px">'+e.prog+'</p>' : '')
+        + (vids ? '<p class="note" style="margin-top:10px"><b>Видео на YouTube</b></p><ul class="vids">'+vids+'</ul>' : '');
       return '<article class="card'+(e.warn?' caution':'')+'"><div class="tags">'+tags+'</div><h3>'+e.name+'</h3><p class="what">'+e.what+'</p>'
         + (e.warn ? '<p class="warnline">'+e.warn+'</p>' : '')
         + '<details><summary>Как делать</summary>'+how+'</details>'
