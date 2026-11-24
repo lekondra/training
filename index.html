@@ -174,6 +174,23 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
     <summary>Текст программы</summary>
     <div class="inner"><p class="note" id="copyMsg">Если кнопка копирования не сработала, выделите текст ниже и скопируйте вручную.</p><textarea id="exportText" readonly></textarea></div>
   </details>
+  <details class="box" id="syncBox" style="margin-top:14px">
+    <summary>Синхронизация с Google Таблицей</summary>
+    <div class="inner">
+      <p>Дневник можно сохранять в вашу Google Таблицу: записи с разных устройств объединяются, а в таблице их удобно смотреть и считать. Настройка один раз описана в файле <b>apps-script/README.md</b> репозитория: нужен скрипт Apps Script и его адрес.</p>
+      <p class="warnbox">Синхронизация работает со страницы на GitHub Pages или с открытого файла. Внутри просмотра в Claude внешние запросы заблокированы.</p>
+      <label class="note" for="syncUrl">Адрес веб-приложения (оканчивается на /exec)</label>
+      <input class="note-in" type="url" id="syncUrl" placeholder="https://script.google.com/macros/s/.../exec">
+      <label class="note" for="syncToken">Пароль из скрипта (TOKEN)</label>
+      <input class="note-in" type="password" id="syncToken" autocomplete="off">
+      <div class="tools">
+        <button class="primary" type="button" data-act="sync-save">Сохранить и синхронизировать</button>
+        <button class="secondary" type="button" data-act="sync-now">Синхронизировать сейчас</button>
+        <button class="secondary" type="button" data-act="sync-clear">Отключить</button>
+      </div>
+      <p class="note" id="syncMsg" role="status">Адрес и пароль хранятся только в этом браузере и в резервную копию не попадают.</p>
+    </div>
+  </details>
   <details class="box" id="backupBox" style="margin-top:14px">
     <summary>Резервная копия</summary>
     <div class="inner">
@@ -372,7 +389,7 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
 
   function byId(id){ for(var i=0;i<EX.length;i++){ if(EX[i].id===id) return EX[i]; } return null; }
   function fresh(){
-    var s = {days:{mon:[],wed:[]}, checks:{mon:[false,false,false], wed:[false,false,false]}, wd:{mon:DEFAULT_WD.mon, wed:DEFAULT_WD.wed}, log:[]};
+    var s = {days:{mon:[],wed:[]}, checks:{mon:[false,false,false], wed:[false,false,false]}, wd:{mon:DEFAULT_WD.mon, wed:DEFAULT_WD.wed}, log:[], deleted:[]};
     ["mon","wed"].forEach(function(d){
       DEFAULT[d].forEach(function(r){ s.days[d].push({id:r[0], sets:r[1], reps:r[2], weight:""}); });
     });
@@ -384,6 +401,7 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
     if(raw){ var p = JSON.parse(raw); if(p && p.days && p.checks) state = p; }
   }catch(e){}
   if(!Array.isArray(state.log)) state.log = [];
+  if(!Array.isArray(state.deleted)) state.deleted = [];
   if(!state.wd || typeof state.wd.mon !== "number" || typeof state.wd.wed !== "number" || state.wd.mon === state.wd.wed){
     state.wd = {mon:DEFAULT_WD.mon, wed:DEFAULT_WD.wed};
   }
@@ -422,6 +440,7 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
       }
     });
     s.log = Array.isArray(p.state.log) ? cleanLog(p.state.log) : (state.log || []);
+    s.deleted = Array.isArray(p.state.deleted) ? p.state.deleted.map(Number).filter(function(n){ return n>0; }) : (state.deleted || []);
     var w = p.state.wd;
     if(w && typeof w.mon==="number" && typeof w.wed==="number" && w.mon!==w.wed && w.mon>=0 && w.mon<7 && w.wed>=0 && w.wed<7){ s.wd = {mon:w.mon, wed:w.wed}; }
     return s;
@@ -467,6 +486,47 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
     return '<div class="hint">Прошлый раз: '+esc(fmtWeight(l.weight))+', '+fmtDate(l.date)
       +' <button class="ghost" type="button" data-act="fill" data-day="'+d+'" data-id="'+id+'">Подставить</button></div>';
   }
+  var SYNCKEY = "knee-program-sync-v1";
+  function loadSync(){
+    try{ var r = JSON.parse(localStorage.getItem(SYNCKEY) || "{}"); return {url:String(r.url||""), token:String(r.token||"")}; }
+    catch(e){ return {url:"", token:""}; }
+  }
+  function storeSync(c){ try{ localStorage.setItem(SYNCKEY, JSON.stringify(c)); }catch(e){} }
+  function syncMsg(t){ document.getElementById("syncMsg").textContent = t; }
+  var syncBusy = false;
+  function syncNow(auto){
+    var c = loadSync();
+    if(!c.url){ if(!auto) syncMsg("Сначала вставьте адрес веб-приложения."); return; }
+    if(syncBusy) return;
+    syncBusy = true;
+    var sentTs = {}, sentDel = {};
+    state.log.forEach(function(e){ sentTs[e.ts] = 1; });
+    state.deleted.forEach(function(t){ sentDel[t] = 1; });
+    var payload = {token:c.token, action:"sync", deleted:state.deleted.slice(),
+      entries:state.log.map(function(e){
+        return {ts:e.ts, date:e.date, slot:e.slot, wd:e.wd, pain:e.pain, checks:e.checks, note:e.note,
+          items:e.items.map(function(i){ return {id:i.id, name:byId(i.id).name, sets:i.sets, reps:i.reps, weight:i.weight}; })};
+      })};
+    syncMsg("Синхронизация…");
+    var finish = function(msg){ syncBusy = false; syncMsg(msg); };
+    try{
+      fetch(c.url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(payload), redirect:"follow"})
+        .then(function(r){ return r.json(); })
+        .then(function(res){
+          if(!res || !res.ok){ finish("Таблица ответила ошибкой: "+((res && res.error) || "неизвестная")+". Проверьте пароль."); return; }
+          var gone = {}; (res.deleted || []).forEach(function(t){ gone[Number(t)] = 1; });
+          var server = cleanLog(res.entries || []).filter(function(e){ return !gone[e.ts]; });
+          var fresher = state.log.filter(function(e){ return !sentTs[e.ts]; });
+          state.log = server.concat(fresher);
+          state.deleted = state.deleted.filter(function(t){ return !sentDel[t]; });
+          save(); render();
+          var n = new Date();
+          finish("Синхронизировано в "+pad(n.getHours())+":"+pad(n.getMinutes())+". Записей в дневнике: "+state.log.length+".");
+        })
+        .catch(function(){ finish("Не удалось связаться с таблицей. Проверьте адрес и откройте страницу с GitHub Pages: из просмотра в Claude внешние запросы заблокированы."); });
+    }catch(e){ finish("Синхронизация здесь недоступна."); }
+  }
+
   var lf = {mon:{date:today(),pain:"",note:""}, wed:{date:today(),pain:"",note:""}};
   var lmsg = {mon:"", wed:""};
   var logFilterVal = "all";
@@ -494,7 +554,7 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
     state.checks[d] = [false,false,false];
     f.pain = ""; f.note = "";
     lmsg[d] = "Записано в дневник за "+fmtDate(date)+".";
-    save(); render();
+    save(); render(); syncNow(true);
   }
 
   function renderLog(){
@@ -677,11 +737,11 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
     }
     else if(act==="dellog"){
       var ts = Number(b.getAttribute("data-ts"));
-      if(pendDel===ts){ state.log = state.log.filter(function(e){ return e.ts!==ts; }); pendDel = null; save(); }
+      if(pendDel===ts){ state.log = state.log.filter(function(e){ return e.ts!==ts; }); if(ts>0 && state.deleted.indexOf(ts)<0){ state.deleted.push(ts); } pendDel = null; save(); syncNow(true); }
       else{ pendDel = ts; }
       renderLog();
     }
-    else if(act==="reset"){ var keepLog = state.log; savePrev(); state = fresh(); state.log = keepLog; save(); render(); bkMsg("Программа сброшена. Прежнюю версию можно вернуть в разделе «Резервная копия»."); }
+    else if(act==="reset"){ var keepLog = state.log, keepDel = state.deleted; savePrev(); state = fresh(); state.log = keepLog; state.deleted = keepDel; save(); render(); bkMsg("Программа сброшена. Прежнюю версию можно вернуть в разделе «Резервная копия»."); }
     else if(act==="undo"){
       var raw2 = null; try{ raw2 = localStorage.getItem(KEY+"-prev"); }catch(e){}
       if(!raw2){ bkMsg("Предыдущей версии пока нет."); document.getElementById("backupBox").open = true; return; }
@@ -689,7 +749,7 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
       var s2 = null; try{ s2 = sanitize({state:JSON.parse(raw2)}); }catch(e){}
       if(!s2){ bkMsg("Предыдущую версию прочитать не удалось."); return; }
       try{ localStorage.setItem(KEY+"-prev", cur); }catch(e){}
-      s2.log = state.log; state = s2; save(); render(); bkMsg("Возвращена предыдущая версия программы. Записи дневника остались как были.");
+      s2.log = state.log; s2.deleted = state.deleted; state = s2; save(); render(); bkMsg("Возвращена предыдущая версия программы. Записи дневника остались как были.");
     }
     else if(act==="bk-download"){
       try{
@@ -707,6 +767,17 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
       try{ navigator.clipboard.writeText(bt.value).then(function(){ok(true);}, function(){ok(false);}); }catch(e){ ok(false); }
     }
     else if(act==="bk-restore"){ restoreFrom(document.getElementById("bkText").value); }
+    else if(act==="sync-save"){
+      var u = document.getElementById("syncUrl").value.trim(), tk = document.getElementById("syncToken").value;
+      if(!/^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(u)){ syncMsg("Адрес должен начинаться с https://script.google.com/macros/s/ и оканчиваться на /exec."); return; }
+      storeSync({url:u, token:tk}); syncNow(false);
+    }
+    else if(act==="sync-now"){ syncNow(false); }
+    else if(act==="sync-clear"){
+      storeSync({url:"", token:""});
+      document.getElementById("syncUrl").value = ""; document.getElementById("syncToken").value = "";
+      syncMsg("Синхронизация отключена. Записи остались в этом браузере.");
+    }
     else if(act==="copy"){
       var box = document.getElementById("exportBox"), ta = document.getElementById("exportText"), msg = document.getElementById("copyMsg");
       ta.value = exportText(); box.open = true;
@@ -722,6 +793,10 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
 
   renderSources();
   render();
+  var sc = loadSync();
+  document.getElementById("syncUrl").value = sc.url;
+  document.getElementById("syncToken").value = sc.token;
+  if(sc.url){ syncNow(true); }
 })();
 </script>
 </body>
