@@ -113,6 +113,16 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
 .avoid li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
 .sources{columns:2 300px;font-size:14px;padding-left:18px;margin:10px 0 0}
 .sources li{break-inside:avoid;margin-bottom:6px}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin:4px 0 8px}
+.tabs button{font:inherit;font-family:var(--font-display);font-weight:700;font-size:16px;background:transparent;color:var(--muted);border:0;border-bottom:3px solid transparent;padding:10px 16px;margin-bottom:-1px;cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tabs .count{font-family:var(--font-body);font-size:12px;font-weight:600;background:var(--accent-soft);color:var(--ink);border-radius:999px;padding:1px 8px;margin-left:4px}
+.tabs .count:empty{display:none}
+[hidden]{display:none !important}
+.nextbar{background:var(--accent-soft);border:1px solid var(--accent);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:15px}
+.day.next{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);order:-1}
+.stat{font-size:12px;border-radius:999px;padding:2px 10px;background:var(--bg);color:var(--muted);border:1px solid var(--line);white-space:nowrap}
+.stat.go{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
 .logbox{display:grid;gap:8px;border-top:1px dashed var(--line);padding-top:10px}
 .logbox>p{font-size:13px;color:var(--muted)}
 .logbox .fields input[type="date"]{width:150px}
@@ -161,6 +171,12 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
   </details>
 </header>
 
+<nav class="tabs" role="tablist" aria-label="Разделы">
+  <button type="button" role="tab" id="tab-btn-program" data-tab="program" aria-controls="tab-program" aria-selected="true">Программа</button>
+  <button type="button" role="tab" id="tab-btn-diary" data-tab="diary" aria-controls="tab-diary" aria-selected="false">Дневник <span class="count" id="diaryCount"></span></button>
+</nav>
+
+<div role="tabpanel" id="tab-program" aria-labelledby="tab-btn-program">
 <section aria-labelledby="prog-h">
   <div class="sec-head">
     <h2 id="prog-h">Моя программа</h2>
@@ -169,54 +185,15 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
       <button class="primary" type="button" data-act="copy">Скопировать как текст</button>
     </div>
   </div>
+  <div id="next"></div>
   <div class="days" id="days"></div>
   <details class="box" id="exportBox" style="margin-top:14px">
     <summary>Текст программы</summary>
     <div class="inner"><p class="note" id="copyMsg">Если кнопка копирования не сработала, выделите текст ниже и скопируйте вручную.</p><textarea id="exportText" readonly></textarea></div>
   </details>
-  <details class="box" id="syncBox" style="margin-top:14px">
-    <summary>Синхронизация с Google Таблицей</summary>
-    <div class="inner">
-      <p>Дневник можно сохранять в вашу Google Таблицу: записи с разных устройств объединяются, а в таблице их удобно смотреть и считать. Настройка один раз описана в файле <b>apps-script/README.md</b> репозитория: нужен скрипт Apps Script и его адрес.</p>
-      <p class="warnbox">Синхронизация работает со страницы на GitHub Pages или с открытого файла. Внутри просмотра в Claude внешние запросы заблокированы.</p>
-      <label class="note" for="syncUrl">Адрес веб-приложения (оканчивается на /exec)</label>
-      <input class="note-in" type="url" id="syncUrl" placeholder="https://script.google.com/macros/s/.../exec">
-      <label class="note" for="syncToken">Пароль из скрипта (TOKEN)</label>
-      <input class="note-in" type="password" id="syncToken" autocomplete="off">
-      <div class="tools">
-        <button class="primary" type="button" data-act="sync-save">Сохранить и синхронизировать</button>
-        <button class="secondary" type="button" data-act="sync-now">Синхронизировать сейчас</button>
-        <button class="secondary" type="button" data-act="sync-clear">Отключить</button>
-      </div>
-      <p class="note" id="syncMsg" role="status">Адрес и пароль хранятся только в этом браузере и в резервную копию не попадают.</p>
-    </div>
-  </details>
-  <details class="box" id="backupBox" style="margin-top:14px">
-    <summary>Резервная копия</summary>
-    <div class="inner">
-      <p>Программа, записи дневника и отметки хранятся только в этом браузере на этом устройстве. Если очистить данные сайта или открыть страницу на другом устройстве, они пропадут. Сохраните копию после изменений и восстановите её, когда понадобится.</p>
-      <div class="tools">
-        <button class="primary" type="button" data-act="bk-download">Скачать файл копии</button>
-        <button class="secondary" type="button" data-act="bk-copy">Скопировать копию как текст</button>
-        <button class="secondary" type="button" data-act="undo">Вернуть предыдущую версию</button>
-      </div>
-      <label class="note" for="bkFile">Восстановить из файла копии</label>
-      <input type="file" id="bkFile" accept=".json,application/json" data-file="1">
-      <label class="note" for="bkText">Или вставьте текст копии сюда</label>
-      <textarea id="bkText" placeholder="Вставьте сюда текст копии"></textarea>
-      <div class="tools"><button class="secondary" type="button" data-act="bk-restore">Восстановить из текста</button></div>
-      <p class="note" id="bkMsg" role="status">Перед каждым восстановлением и сбросом программы текущая версия сохраняется, её можно вернуть кнопкой выше. Сброс программы дневник не стирает.</p>
-    </div>
-  </details>
 </section>
 
-<section aria-labelledby="log-h">
-  <div class="sec-head">
-    <h2 id="log-h">Дневник</h2>
-    <label class="note" for="logFilter">Показать <select id="logFilter"></select></label>
-  </div>
-  <div id="log"></div>
-</section>
+
 
 <section aria-labelledby="lib-h">
   <div class="sec-head">
@@ -242,6 +219,52 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
   <h2 id="src-h">Источники</h2>
   <ul class="sources" id="sources"></ul>
 </section>
+</div>
+
+<div role="tabpanel" id="tab-diary" aria-labelledby="tab-btn-diary" hidden>
+<section aria-labelledby="log-h">
+  <div class="sec-head">
+    <h2 id="log-h">Дневник</h2>
+    <label class="note" for="logFilter">Показать <select id="logFilter"></select></label>
+  </div>
+  <p class="note" style="margin-bottom:12px">Тренировку записывают на вкладке «Программа» кнопкой «Записать в дневник» в карточке тренировки.</p>
+  <div id="log"></div>
+  <details class="box" id="syncBox" style="margin-top:20px">
+    <summary>Синхронизация с Google Таблицей</summary>
+    <div class="inner">
+      <p>Дневник можно сохранять в вашу Google Таблицу: записи с разных устройств объединяются, а в таблице их удобно смотреть и считать. Настройка один раз описана в файле <b>apps-script/README.md</b> репозитория: нужен скрипт Apps Script и его адрес.</p>
+      <p class="warnbox">Синхронизация работает со страницы на GitHub Pages или с открытого файла. Внутри просмотра в Claude внешние запросы заблокированы.</p>
+      <label class="note" for="syncUrl">Адрес веб-приложения (оканчивается на /exec)</label>
+      <input class="note-in" type="url" id="syncUrl" placeholder="https://script.google.com/macros/s/.../exec">
+      <label class="note" for="syncToken">Пароль из скрипта (TOKEN)</label>
+      <input class="note-in" type="password" id="syncToken" autocomplete="off">
+      <div class="tools">
+        <button class="primary" type="button" data-act="sync-save">Сохранить и синхронизировать</button>
+        <button class="secondary" type="button" data-act="sync-now">Синхронизировать сейчас</button>
+        <button class="secondary" type="button" data-act="sync-clear">Отключить</button>
+      </div>
+      <p class="note" id="syncMsg" role="status">Адрес и пароль хранятся только в этом браузере и в резервную копию не попадают.</p>
+    </div>
+  </details>
+  <details class="box" id="backupBox" style="margin-top:20px">
+    <summary>Резервная копия</summary>
+    <div class="inner">
+      <p>Программа, записи дневника и отметки хранятся только в этом браузере на этом устройстве. Если очистить данные сайта или открыть страницу на другом устройстве, они пропадут. Сохраните копию после изменений и восстановите её, когда понадобится.</p>
+      <div class="tools">
+        <button class="primary" type="button" data-act="bk-download">Скачать файл копии</button>
+        <button class="secondary" type="button" data-act="bk-copy">Скопировать копию как текст</button>
+        <button class="secondary" type="button" data-act="undo">Вернуть предыдущую версию</button>
+      </div>
+      <label class="note" for="bkFile">Восстановить из файла копии</label>
+      <input type="file" id="bkFile" accept=".json,application/json" data-file="1">
+      <label class="note" for="bkText">Или вставьте текст копии сюда</label>
+      <textarea id="bkText" placeholder="Вставьте сюда текст копии"></textarea>
+      <div class="tools"><button class="secondary" type="button" data-act="bk-restore">Восстановить из текста</button></div>
+      <p class="note" id="bkMsg" role="status">Перед каждым восстановлением и сбросом программы текущая версия сохраняется, её можно вернуть кнопкой выше. Сброс программы дневник не стирает.</p>
+    </div>
+  </details>
+</section>
+</div>
 
 </div>
 
@@ -532,6 +555,48 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
   var logFilterVal = "all";
   var pendDel = null;
 
+  function weekdayOf(date){
+    var p = date.split("-"), d = new Date(Number(p[0]), Number(p[1])-1, Number(p[2]));
+    return WDS[(d.getDay()+6)%7];
+  }
+  function latestEntry(slot){
+    var best = null;
+    state.log.forEach(function(e){
+      if(slot && e.slot!==slot) return;
+      if(!best || e.date>best.date || (e.date===best.date && e.ts>best.ts)) best = e;
+    });
+    return best;
+  }
+  function nextSlot(){
+    var last = latestEntry(null);
+    if(!last) return "mon";
+    return last.slot==="mon" ? "wed" : "mon";
+  }
+  function slotStatus(d){
+    var le = latestEntry(d);
+    return '<span class="stat'+(nextSlot()===d?' go':'')+'">'+(nextSlot()===d ? 'Следующая' : (le ? 'Сделана '+fmtDate(le.date).slice(0,5) : ''))+'</span>';
+  }
+  function renderNext(){
+    var n = nextSlot(), last = latestEntry(null), box = document.getElementById("next");
+    var txt;
+    if(!last){
+      txt = '<b>Начните с тренировки 1</b> ('+WD[state.wd.mon]+'). После записи в дневник здесь появится следующая тренировка.';
+    }else{
+      txt = '<b>Следующая: '+SLOTNAME[n]+', '+WD[state.wd[n]].toLowerCase()+'.</b> Последняя запись: '+fmtDate(last.date)+', '+SLOTNAME[last.slot].toLowerCase()+'.';
+    }
+    box.innerHTML = '<p class="nextbar">'+txt+'</p>';
+  }
+
+  var TABS = ["program","diary"];
+  function showTab(name, push){
+    if(TABS.indexOf(name)<0) name = "program";
+    TABS.forEach(function(t){
+      document.getElementById("tab-"+t).hidden = (t!==name);
+      document.getElementById("tab-btn-"+t).setAttribute("aria-selected", String(t===name));
+    });
+    if(push){ try{ if(location.hash !== "#"+name) location.hash = name; }catch(e){} }
+  }
+
   function logBox(d){
     var f = lf[d], po = '<option value="">не указана</option>';
     for(var i=0;i<=10;i++){ po += '<option value="'+i+'"'+(String(f.pain)===String(i)?' selected':'')+'>'+i+' из 10</option>'; }
@@ -541,7 +606,7 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
       +'<label class="note" for="nt-'+d+'">Заметка</label>'
       +'<input class="note-in" type="text" id="nt-'+d+'" data-lf="note" data-day="'+d+'" placeholder="Как прошло, что менять" value="'+esc(f.note)+'">'
       +'<div class="tools"><button class="primary" type="button" data-act="savelog" data-day="'+d+'">Записать в дневник</button></div>'
-      +'<p class="note" role="status">'+esc(lmsg[d])+'</p></div>';
+      +'<p class="note" role="status">'+esc(lmsg[d])+(lmsg[d].indexOf("Записано")===0 ? ' <button class="ghost" type="button" data-act="open-diary">Открыть дневник</button>' : '')+'</p></div>';
   }
 
   function saveLog(d){
@@ -553,7 +618,8 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
       pain:(f.pain===""?null:parseInt(f.pain,10)), checks:state.checks[d].slice(), note:f.note||""});
     state.checks[d] = [false,false,false];
     f.pain = ""; f.note = "";
-    lmsg[d] = "Записано в дневник за "+fmtDate(date)+".";
+    var nx = nextSlot();
+    lmsg[d] = "Записано в дневник за "+fmtDate(date)+". Следующая: "+SLOTNAME[nx].toLowerCase()+", "+WD[state.wd[nx]].toLowerCase()+".";
     save(); render(); syncNow(true);
   }
 
@@ -587,7 +653,7 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
       var okc = e.checks.filter(Boolean).length;
       var pain = (e.pain===null) ? "" : '<span class="badge'+(e.pain>3?' warn':'')+'">Боль до '+e.pain+' из 10</span>';
       var del = (pendDel===e.ts) ? "Точно удалить?" : "Удалить";
-      return '<article class="entry"><div class="entry-head"><b>'+fmtDate(e.date)+', '+WDS[e.wd]+'</b>'
+      return '<article class="entry"><div class="entry-head"><b>'+fmtDate(e.date)+', '+weekdayOf(e.date)+'</b> <span class="note">'+SLOTNAME[e.slot]+'</span>'
         +'<button class="ghost" type="button" data-act="dellog" data-ts="'+e.ts+'">'+del+'</button></div>'
         +'<div class="tags">'+pain+'<span class="badge">Контроль: '+okc+' из 3</span></div>'
         +'<ul>'+its+'</ul>'+(e.note ? '<p class="note">'+esc(e.note)+'</p>' : '')+'</article>';
@@ -617,7 +683,7 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
       var opts = WD.map(function(n,i){
         return '<option value="'+i+'"'+(state.wd[d]===i?' selected':'')+(state.wd[other]===i?' disabled':'')+'>'+n+'</option>';
       }).join("");
-      html += '<article class="day"><div class="day-head"><label class="daypick">'+SLOTNAME[d]+'<select id="wd-'+d+'" data-wd="'+d+'">'+opts+'</select></label></div>'
+      html += '<article class="day'+(nextSlot()===d?' next':'')+'"><div class="day-head"><label class="daypick">'+SLOTNAME[d]+'<select id="wd-'+d+'" data-wd="'+d+'">'+opts+'</select></label>'+slotStatus(d)+'</div>'
         +'<ol class="rows">'+rows+'</ol>'
         +'<div class="checks"><p>После тренировки отметьте:</p>'+checks+'</div>'+logBox(d)+'</article>';
     });
@@ -685,7 +751,8 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
   }
 
   function render(){
-    renderDays(); renderChips(); renderLib(); renderLog();
+    renderNext(); renderDays(); renderChips(); renderLib(); renderLog();
+    document.getElementById("diaryCount").textContent = state.log.length ? String(state.log.length) : "";
     document.getElementById("exportText").value = exportText();
   }
 
@@ -727,6 +794,8 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
     var b = ev.target.closest ? ev.target.closest("button") : null;
     if(!b) return;
     var act = b.getAttribute("data-act");
+    if(b.hasAttribute("data-tab")){ showTab(b.getAttribute("data-tab"), true); return; }
+    if(act==="open-diary"){ showTab("diary", true); try{ window.scrollTo(0,0); }catch(e){} return; }
     if(b.hasAttribute("data-filter")){ filter = b.getAttribute("data-filter"); renderChips(); renderLib(); return; }
     if(act==="toggle"){ toggle(b.getAttribute("data-day"), b.getAttribute("data-id")); }
     else if(act==="remove"){ toggle(b.getAttribute("data-day"), b.getAttribute("data-id")); }
@@ -793,6 +862,8 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
 
   renderSources();
   render();
+  window.addEventListener("hashchange", function(){ showTab(location.hash.replace("#",""), false); });
+  showTab(location.hash.replace("#",""), false);
   var sc = loadSync();
   document.getElementById("syncUrl").value = sc.url;
   document.getElementById("syncToken").value = sc.token;

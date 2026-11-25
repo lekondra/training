@@ -86,7 +86,7 @@ function renderView_(entries) {
     const d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
     const ok = (en.checks || []).filter(Boolean).length;
     (en.items || []).forEach(function (it) {
-      rows.push([d, WD[en.wd] || '', it.name || it.id, it.sets, it.reps, it.weight,
+      rows.push([d, WD[(d.getDay() + 6) % 7], it.name || it.id, it.sets, it.reps, it.weight,
         (en.pain === null || en.pain === undefined) ? '' : en.pain, ok, en.note || '']);
     });
   });
