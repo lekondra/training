@@ -107,6 +107,9 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
 .card .warnline{font-size:13px;background:var(--warn-bg);color:var(--warn-ink);border-radius:8px;padding:8px 10px}
 .srcs{font-size:12px;color:var(--muted)}
 .add{display:flex;gap:8px}
+.addbox{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.addbox select{flex:1;min-width:180px;font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.addbox button{border-radius:10px;padding:8px 14px;font-size:14px;font-weight:600;border:1px solid var(--accent);background:transparent;color:var(--accent)}
 .add button{flex:1;border-radius:10px;padding:8px 10px;font-size:14px;font-weight:600;border:1px solid var(--accent);background:transparent;color:var(--accent)}
 .add button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .avoid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px;margin:12px 0 0;padding:0;list-style:none}
@@ -272,6 +275,7 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
 (function(){
   var SRC = {
     video:   {t:"Видео реабилитолога"},
+    own:     {t:"Общие правила техники, подобраны с оглядкой на колено"},
     medbridge:{t:"MedBridge", u:"https://www.medbridge.com/blog/effective-meniscus-injury-exercises-for-rehabilitation-and-recovery"},
     mgb:     {t:"Mass General Brigham", u:"https://www.massgeneralbrigham.org/content/dam/unified-xwalk/pdf/patient-education/english/rehabilitation-protocol-for-meniscus-repair.pdf"},
     gundersen:{t:"Gundersen Health", u:"https://www.gundersenhealth.org/document/11511"},
@@ -310,7 +314,7 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
     ham_stretch:[["CmIbrEiMXik","Лёжа на спине"],["-3ZFLVf1a4c","Лёжа, пилатес"]]
   };
 
-  var CATS = ["Квадрицепс","Задняя поверхность","Ягодицы и бёдра","Голень","Функциональные","Баланс","Разминка и растяжка"];
+  var CATS = ["Квадрицепс","Задняя поверхность","Ягодицы и бёдра","Голень","Функциональные","Баланс","Верх тела и пресс","Разминка и растяжка"];
 
   var EX = [
     {id:"bike", name:"Велотренажёр или эллипс", cat:"Разминка и растяжка", level:"extra",
@@ -393,6 +397,30 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
      what:"После тренировки, в конце.",
      how:["Руки на стене, одна нога сзади, пятка на полу, колено сзади прямое.","Подайтесь вперёд до растяжения в икре, держите 20–30 секунд."],
      sets:2, reps:"30 с на ногу", src:["alberta","gundersen"]},
+    {id:"pullup", name:"Подтягивания", cat:"Верх тела и пресс", level:"extra",
+     what:"Спина и руки. Колено почти не нагружается, если не спрыгивать с перекладины.",
+     how:["Хват чуть шире плеч, лопатки сведены вниз и назад.","Подтянитесь до подбородка над перекладиной, без раскачки и рывка.","Опускайтесь медленно до почти прямых рук."],
+     warn:"Сходите с перекладины на ступень или пол мягко, не спрыгивайте: приземление бьёт по колену. Не скрещивайте и не раскачивайте ноги с рывком.",
+     prog:"В поле «Вес» можно написать «резинка» или добавочный вес, если он есть.",
+     sets:3, reps:"5", src:["own"]},
+    {id:"crunch", name:"Скручивания на пресс", cat:"Верх тела и пресс", level:"extra",
+     what:"Прямая мышца живота. Лёжа на спине, колено не нагружается.",
+     how:["Лёжа на спине, колени согнуты, стопы на полу.","Оторвите лопатки от пола, поясница прижата.","Без рывка шеи и без вращения корпуса."],
+     sets:3, reps:"15", src:["own"]},
+    {id:"plank", name:"Планка", cat:"Верх тела и пресс", level:"extra",
+     what:"Кора: пресс и мышцы-стабилизаторы спины. Можно с опорой на предплечья.",
+     how:["Опора на предплечья и носки (или колени на мягком коврике, если колену неприятно).","Тело в одну линию, таз не проваливается и не задирается.","Дышите ровно."],
+     warn:"Если стоять на коленях на твёрдом полу неприятно, делайте планку на носках или подложите мягкую опору.",
+     sets:3, reps:"30 с", src:["own"]},
+    {id:"dead_bug", name:"«Мёртвый жук»", cat:"Верх тела и пресс", level:"extra",
+     what:"Мягкий вариант для пресса и контроля поясницы, нагрузка на колено минимальна.",
+     how:["Лёжа на спине, руки вверх, ноги согнуты на 90° в воздухе.","Медленно опускайте противоположные руку и ногу, поясница прижата к полу.","Вернитесь и смените сторону."],
+     sets:3, reps:"8 на сторону", src:["own"]},
+    {id:"hang_raise", name:"Подъём коленей в висе", cat:"Верх тела и пресс", level:"extra",
+     what:"Низ пресса и хват. Колено сгибается без нагрузки.",
+     how:["Вис на перекладине, лопатки слегка опущены.","Подтяните колени к груди без раскачки.","Медленно опустите ноги."],
+     warn:"Не раскачивайтесь и сходите с перекладины на ступень или пол мягко.",
+     sets:3, reps:"10", src:["own"]},
     {id:"ham_stretch", name:"Растяжка задней поверхности бедра", cat:"Разминка и растяжка", level:"extra",
      what:"После тренировки, в конце.",
      how:["Лёжа на спине, петля (полотенце) на стопе, нога поднята.","Тяните ногу к себе, пока не почувствуете растяжение, без боли в колене."],
@@ -661,6 +689,19 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
     box.innerHTML = html;
   }
 
+  var addSel = {mon:"", wed:""};
+  function addBox(d){
+    var groups = CATS.map(function(c){
+      var opts = EX.filter(function(e){ return e.cat===c && !inDay(d,e.id); }).map(function(e){
+        return '<option value="'+e.id+'"'+(addSel[d]===e.id?' selected':'')+'>'+e.name+'</option>';
+      }).join("");
+      return opts ? '<optgroup label="'+c+'">'+opts+'</optgroup>' : "";
+    }).join("");
+    if(!groups) return "";
+    return '<div class="addbox"><select id="add-'+d+'" data-addsel="'+d+'" aria-label="Добавить упражнение в тренировку">'
+      +'<option value="">Добавить упражнение…</option>'+groups+'</select>'
+      +'<button type="button" data-act="add-ex" data-day="'+d+'">Добавить</button></div>';
+  }
   function renderDays(){
     var html = "";
     ["mon","wed"].forEach(function(d){
@@ -675,7 +716,7 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
           +'<label>Вес<input class="wt" type="text" placeholder="кг" id="w-'+d+'-'+e.id+'" data-f="weight" data-day="'+d+'" data-id="'+e.id+'" value="'+esc(r.weight)+'"></label>'
           +'</div>'+lastHint(d,e.id)+'</li>';
       }).join("");
-      if(!rows) rows = '<li class="empty">Пока пусто. Добавьте упражнения из библиотеки ниже.</li>';
+      if(!rows) rows = '<li class="empty">Пока пусто. Добавьте упражнение в поле ниже или из библиотеки.</li>';
       var checks = CHECKS.map(function(c,i){
         return '<label><input type="checkbox" id="c-'+d+'-'+i+'" data-chk="'+d+'" data-i="'+i+'"'+(state.checks[d][i]?' checked':'')+'>'+c+'</label>';
       }).join("");
@@ -684,7 +725,7 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
         return '<option value="'+i+'"'+(state.wd[d]===i?' selected':'')+(state.wd[other]===i?' disabled':'')+'>'+n+'</option>';
       }).join("");
       html += '<article class="day'+(nextSlot()===d?' next':'')+'"><div class="day-head"><label class="daypick">'+SLOTNAME[d]+'<select id="wd-'+d+'" data-wd="'+d+'">'+opts+'</select></label>'+slotStatus(d)+'</div>'
-        +'<ol class="rows">'+rows+'</ol>'
+        +'<ol class="rows">'+rows+'</ol>'+addBox(d)
         +'<div class="checks"><p>После тренировки отметьте:</p>'+checks+'</div>'+logBox(d)+'</article>';
     });
     document.getElementById("days").innerHTML = html;
@@ -769,6 +810,7 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
 
   document.addEventListener("change", function(ev){
     var t = ev.target, w = t.getAttribute && t.getAttribute("data-wd");
+    if(t.getAttribute && t.getAttribute("data-addsel")){ addSel[t.getAttribute("data-addsel")] = t.value; return; }
     if(t.id==="logFilter"){ logFilterVal = t.value; pendDel = null; renderLog(); return; }
     if(t.getAttribute && t.getAttribute("data-file") && t.files && t.files[0]){
       var fr = new FileReader();
@@ -798,6 +840,10 @@ textarea{width:100%;min-height:200px;font:14px/1.5 var(--font-body);padding:10px
     if(act==="open-diary"){ showTab("diary", true); try{ window.scrollTo(0,0); }catch(e){} return; }
     if(b.hasAttribute("data-filter")){ filter = b.getAttribute("data-filter"); renderChips(); renderLib(); return; }
     if(act==="toggle"){ toggle(b.getAttribute("data-day"), b.getAttribute("data-id")); }
+    else if(act==="add-ex"){
+      var ad = b.getAttribute("data-day"), av = addSel[ad];
+      if(av && byId(av) && !inDay(ad,av)){ addSel[ad] = ""; toggle(ad, av); }
+    }
     else if(act==="remove"){ toggle(b.getAttribute("data-day"), b.getAttribute("data-id")); }
     else if(act==="savelog"){ saveLog(b.getAttribute("data-day")); }
     else if(act==="fill"){
